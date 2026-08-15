@@ -1,12 +1,12 @@
 use crate::parsers::selector::LogParser;
 
+use crate::models::{LogEntry, ParseError};
 pub struct WtmpLog;
 
 impl LogParser for WtmpLog {
-    fn parser(
-        &self,
-        _path: &std::path::Path,
-    ) -> Result<crate::models::LogEntry, crate::models::ParseError> {
-        todo!()
+    fn parser(&self, _path: &std::path::Path) -> Result<LogEntry, ParseError> {
+        Err(ParseError::MalformedLine(
+            "WtmpLog::parser not yet implemented".into(),
+        ))
     }
 }
