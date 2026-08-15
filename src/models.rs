@@ -85,3 +85,39 @@ pub enum PathStatus {
     NotFound,
     Indeterminate(Error),
 }
+
+#[derive(Debug)]
+pub enum ParseError {
+    IoError(Error),
+    MalformedLine(String),
+    UnexpectedFormat(String),
+}
+
+#[derive(Debug)]
+pub enum LogEntry {
+    Sys(SysRecord),
+    Auth(AuthRecord),
+    Wtmp(WtmpRecord),
+    Journal(JournalRecord),
+    Container(ContainerRecord),
+}
+
+#[derive(Debug)]
+pub struct SysRecord;
+// TODO: study structure and look for the main fields
+
+#[derive(Debug)]
+pub struct AuthRecord;
+// TODO: study structure and look for the main fields
+
+#[derive(Debug)]
+pub struct WtmpRecord;
+// TODO: study structure and look for the main fields
+
+#[derive(Debug)]
+pub struct JournalRecord;
+// TODO: study structure and look for the main fields
+
+#[derive(Debug)]
+pub struct ContainerRecord;
+// TODO: study structure and look for the main fields

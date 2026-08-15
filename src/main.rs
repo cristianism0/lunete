@@ -1,4 +1,5 @@
 pub mod models;
+pub mod parsers;
 pub mod utils;
 
 use crate::models::*;

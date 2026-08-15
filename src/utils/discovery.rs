@@ -83,7 +83,3 @@ impl Finfo {
         }
     }
 }
-
-pub fn parser_dispatcher(_file_info: Finfo) {
-    //dispatch based on the LogSource, the differentiation will be done inside the trait functions.
-}
