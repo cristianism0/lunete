@@ -19,10 +19,6 @@ pub struct SourceCandidate {
 pub const SOURCES: &[SourceCandidate] = &[
     SourceCandidate {
         source: LogSource::Auth,
-        path: "/var/log/auth.log",
-    },
-    SourceCandidate {
-        source: LogSource::Auth,
         path: "/var/log/secure",
     },
     SourceCandidate {
@@ -36,10 +32,6 @@ pub const SOURCES: &[SourceCandidate] = &[
     SourceCandidate {
         source: LogSource::Sys,
         path: "/var/log/messages",
-    },
-    SourceCandidate {
-        source: LogSource::Sys,
-        path: "/var/log/kern.log",
     },
 ];
 
