@@ -33,6 +33,15 @@ pub const SOURCES: &[SourceCandidate] = &[
         source: LogSource::Sys,
         path: "/var/log/messages",
     },
+    // legacy - fallback for journald
+    SourceCandidate {
+        source: LogSource::Sys,
+        path: "/var/log/kern.log",
+    },
+    SourceCandidate {
+        source: LogSource::Auth,
+        path: "/var/log/auth.log",
+    },
 ];
 
 #[derive(Debug)]
@@ -103,9 +112,16 @@ pub struct AuthRecord;
 // TODO: study structure and look for the main fields
 
 #[derive(Debug)]
-pub struct WtmpRecord;
-// TODO: study structure and look for the main fields
-
+pub struct WtmpRecord {
+    pub ut_type: i16,
+    pub ut_pid: i32,
+    pub ut_dname: String,
+    pub ut_id: String,
+    pub ut_user: String,
+    pub ut_host: String,
+    pub e_termination: i16,
+    pub e_exit: i16,
+}
 #[derive(Debug)]
 pub struct JournalRecord;
 // TODO: study structure and look for the main fields

@@ -4,7 +4,7 @@ use crate::parsers::selector::LogParser;
 pub struct ContainerLog;
 
 impl LogParser for ContainerLog {
-    fn parser(&self, _path: &std::path::Path) -> Result<LogEntry, ParseError> {
+    fn parser(&self, _path: &std::path::Path) -> Result<Vec<LogEntry>, ParseError> {
         Err(ParseError::MalformedLine(
             "ContainerLog::parser not yet implemented".into(),
         ))

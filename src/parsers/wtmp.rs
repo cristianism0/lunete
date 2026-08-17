@@ -1,12 +1,51 @@
 use crate::parsers::selector::LogParser;
+use std::io::{Read, Seek, SeekFrom};
+use std::{fs::File, path::Path};
 
-use crate::models::{LogEntry, ParseError};
+use crate::models::{LogEntry, ParseError, WtmpRecord};
 pub struct WtmpLog;
 
 impl LogParser for WtmpLog {
-    fn parser(&self, _path: &std::path::Path) -> Result<LogEntry, ParseError> {
-        Err(ParseError::MalformedLine(
-            "WtmpLog::parser not yet implemented".into(),
-        ))
+    fn parser(&self, path: &Path) -> Result<Vec<LogEntry>, ParseError> {
+        let mut cursor: u64 = 0;
+        let mut f = File::open(path).map_err(ParseError::IoError)?;
+        let meta = f.metadata().map_err(ParseError::IoError)?;
+        let file_len = meta.len();
+
+        if file_len < cursor {
+            cursor = 0;
+        }
+
+        let mut entries = Vec::new();
+
+        if file_len > cursor {
+            f.seek(SeekFrom::Start(cursor))
+                .map_err(ParseError::IoError)?;
+            let mut buf = vec![0u8; (file_len - cursor) as usize];
+            f.read_exact(&mut buf).map_err(ParseError::IoError)?;
+
+            for r in buf.chunks_exact(384) {
+                entries.push(LogEntry::Wtmp(parse_record(r)));
+            }
+        }
+
+        Ok(entries)
     }
+}
+fn parse_record(buffer: &[u8]) -> WtmpRecord {
+    WtmpRecord {
+        ut_type: i16::from_ne_bytes(buffer[0..2].try_into().unwrap()),
+        ut_pid: i32::from_ne_bytes(buffer[4..8].try_into().unwrap()),
+        ut_dname: bytes_to_string(&buffer[8..40]),
+        ut_id: bytes_to_string(&buffer[40..44]),
+        ut_user: bytes_to_string(&buffer[44..76]),
+        ut_host: bytes_to_string(&buffer[76..332]),
+        e_termination: i16::from_ne_bytes(buffer[332..334].try_into().unwrap()),
+        e_exit: i16::from_ne_bytes(buffer[334..336].try_into().unwrap()),
+    }
+}
+
+fn bytes_to_string(raw: &[u8]) -> String {
+    let end = raw.iter().position(|&b| b == 0).unwrap_or(raw.len());
+    String::from_utf8_lossy(&raw[..end]).into_owned()
 }

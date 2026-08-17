@@ -5,7 +5,7 @@ use std::path::Path;
 use crate::models::{Finfo, LogEntry, LogSource, ParseError};
 use crate::parsers::*;
 
-pub fn parser_selector(file_info: Finfo) -> Result<LogEntry, ParseError> {
+pub fn parser_selector(file_info: Finfo) -> Result<Vec<LogEntry>, ParseError> {
     match file_info.source {
         LogSource::Sys => {
             let p = syslog::SysLog;
@@ -36,7 +36,7 @@ pub fn parser_selector(file_info: Finfo) -> Result<LogEntry, ParseError> {
 }
 
 pub trait LogParser {
-    fn parser(&self, path: &Path) -> Result<LogEntry, ParseError>;
+    fn parser(&self, path: &Path) -> Result<Vec<LogEntry>, ParseError>;
 
     fn check_access(&self, path: &Path) -> Result<(), ParseError> {
         match File::open(path) {
