@@ -42,7 +42,7 @@ pub trait LogParser {
         match File::open(path) {
             Ok(_) => Ok(()),
             Err(e) if e.kind() == ErrorKind::NotFound => Err(ParseError::MalformedLine(format!(
-                "Path doesn't exists anymore: {:?}",
+                "Path doesn't exists or was moved: {:#?}",
                 path
             ))),
             Err(e) => Err(ParseError::IoError(e)),

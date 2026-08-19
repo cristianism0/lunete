@@ -2,3 +2,7 @@
 name = "lunete"
 version = "0.1.0"
 edition = "2024"
+
+[dependencies]
+systemd = "0.10.1"
+tabled = "0.21.0"
