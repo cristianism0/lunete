@@ -57,7 +57,6 @@ impl Finfo {
         match lsc {
             LogSource::Wtmp => ContentFormat::Binary,
             LogSource::Auth | LogSource::Sys => ContentFormat::PlainText,
-            LogSource::Journal => ContentFormat::Binary,
             LogSource::Container => ContentFormat::Unknown,
         }
     }

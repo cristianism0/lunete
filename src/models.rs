@@ -8,10 +8,16 @@ pub enum LogSource {
     Auth,
     Sys,
     Wtmp,
-    Journal,
     Container,
 }
 
+#[derive(Debug)]
+pub enum JournalScope {
+    System,
+    User,
+}
+
+// ---------- Paths ----------
 #[derive(Debug)]
 pub struct SourceCandidate {
     pub source: LogSource,
@@ -45,7 +51,7 @@ pub const SOURCES: &[SourceCandidate] = &[
         path: "/var/log/auth.log",
     },
 ];
-
+// ---------- File Variants ----------
 #[derive(Debug)]
 pub enum FsKind {
     Regular,
@@ -66,6 +72,7 @@ pub enum ContentFormat {
     Unknown,
 }
 
+// ---------- File Data Structures ----------
 #[derive(Debug)]
 pub struct Finfo {
     pub path: PathBuf,
@@ -82,6 +89,7 @@ pub struct FiData {
     pub format: ContentFormat,
 }
 
+// ---------- Error Models ----------
 #[derive(Debug)]
 pub enum PathStatus {
     Found,
@@ -96,6 +104,15 @@ pub enum ParseError {
     UnexpectedFormat(String),
 }
 
+#[derive(Debug)]
+pub enum JournalError {
+    IoError(Error),
+    FieldMissing(String), // ENODATA
+    NotPositioned,        // EADDRNOTAVAIL
+    Unavailable(String),
+}
+
+// ---------- Records ----------
 #[derive(Debug, Tabled)]
 pub struct SysRecord {
     pub raw: String,
@@ -149,7 +166,7 @@ impl LogEntry {
     }
 }
 
-pub trait FromLogEntry: Sized {
+pub trait FromLogEntry {
     fn from_entry(entry: &LogEntry) -> Option<&Self>;
 }
 

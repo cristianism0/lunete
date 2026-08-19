@@ -3,7 +3,6 @@ pub mod parsers;
 pub mod utils;
 
 use crate::utils::extract::build_table;
-
 use crate::{models::*, parsers::selector::parser_selector};
 
 fn main() {
@@ -29,8 +28,8 @@ fn main() {
     ];
 
     for d in t {
-        if let Some(table) = d {
-            println!("{table}");
+        if let Some(_table) = d {
+            //println!("{table}");
         }
     }
 }

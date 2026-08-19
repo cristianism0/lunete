@@ -1,8 +1,9 @@
 use std::fs::File;
 use std::io::ErrorKind;
 use std::path::Path;
+use systemd::journal::{Journal, OpenOptions};
 
-use crate::models::{Finfo, LogEntry, LogSource, ParseError};
+use crate::models::{Finfo, JournalError, JournalScope, LogEntry, LogSource, ParseError};
 use crate::parsers::*;
 
 pub fn parser_selector(file_info: Finfo) -> Result<Vec<LogEntry>, ParseError> {
@@ -19,11 +20,6 @@ pub fn parser_selector(file_info: Finfo) -> Result<Vec<LogEntry>, ParseError> {
         }
         LogSource::Wtmp => {
             let p = wtmp::WtmpLog;
-            p.check_access(&file_info.path)?;
-            p.parser(&file_info.path)
-        }
-        LogSource::Journal => {
-            let p = journal::JournalLog;
             p.check_access(&file_info.path)?;
             p.parser(&file_info.path)
         }
@@ -48,4 +44,22 @@ pub trait LogParser {
             Err(e) => Err(ParseError::IoError(e)),
         }
     }
+}
+
+pub trait JournalParser {
+    fn connect(&self, scope: JournalScope) -> Result<Journal, JournalError> {
+        let mut opts = OpenOptions::default();
+        opts.local_only(true).runtime_only(false);
+        match scope {
+            JournalScope::System => {
+                opts.system(true);
+            }
+            JournalScope::User => {
+                opts.current_user(true);
+            }
+        }
+        opts.open()
+            .map_err(|e| JournalError::Unavailable(e.to_string()))
+    }
+    fn parse(&self, journal: &mut Journal) -> Result<Vec<LogEntry>, JournalError>;
 }
