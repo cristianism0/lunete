@@ -8,7 +8,6 @@ pub enum LogSource {
     Auth,
     Sys,
     Wtmp,
-    Container,
 }
 
 #[derive(Debug, Clone)]
@@ -28,8 +27,7 @@ pub enum RecordType<'a> {
     Sys(&'a [LogEntry]),
     Auth(&'a [LogEntry]),
     Wtmp(&'a [LogEntry]),
-    Journal(&'a [LogEntry], JournalScope),
-    Container(&'a [LogEntry]),
+    Journal(&'a [LogEntry], &'a JournalScope),
 }
 
 // ---------- Paths ----------
@@ -57,10 +55,6 @@ pub const SOURCES: &[SourceCandidate] = &[
         path: "/var/log/messages",
     },
     // legacy - fallback for journald
-    SourceCandidate {
-        source: LogSource::Sys,
-        path: "/var/log/kern.log",
-    },
     SourceCandidate {
         source: LogSource::Auth,
         path: "/var/log/auth.log",
@@ -212,17 +206,11 @@ fn display_opt(opt: &Option<String>) -> String {
 }
 
 #[derive(Debug, Tabled)]
-pub struct ContainerRecord {
-    pub raw: String,
-}
-
-#[derive(Debug, Tabled)]
 pub enum LogEntry {
     Sys(#[tabled(inline)] SysRecord),
     Auth(#[tabled(inline)] AuthRecord),
     Wtmp(#[tabled(inline)] WtmpRecord),
     Journal(#[tabled(inline)] JournalRecord),
-    Container(#[tabled(inline)] ContainerRecord),
 }
 
 impl LogEntry {
@@ -232,7 +220,6 @@ impl LogEntry {
             LogEntry::Auth(_) => "AUTH",
             LogEntry::Wtmp(_) => "WTMP",
             LogEntry::Journal(_) => "JOURNAL",
-            LogEntry::Container(_) => "CONTAINER",
         }
     }
 }
@@ -272,15 +259,6 @@ impl FromLogEntry for JournalRecord {
     fn from_entry(entry: &LogEntry) -> Option<&Self> {
         match entry {
             LogEntry::Journal(r) => Some(r),
-            _ => None,
-        }
-    }
-}
-
-impl FromLogEntry for ContainerRecord {
-    fn from_entry(entry: &LogEntry) -> Option<&Self> {
-        match entry {
-            LogEntry::Container(r) => Some(r),
             _ => None,
         }
     }

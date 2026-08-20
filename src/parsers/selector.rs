@@ -23,11 +23,6 @@ pub fn parser_selector(file_info: Finfo) -> Result<Vec<LogEntry>, ParseError> {
             p.check_access(&file_info.path)?;
             p.parser(&file_info.path)
         }
-        LogSource::Container => {
-            let p = container::ContainerLog;
-            p.check_access(&file_info.path)?;
-            p.parser(&file_info.path)
-        }
     }
 }
 

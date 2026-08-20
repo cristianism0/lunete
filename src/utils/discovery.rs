@@ -32,7 +32,7 @@ impl Finfo {
                 pstatus: PathStatus::NotFound,
                 data: None,
             },
-            Err(e) => match std::fs::metadata(path) {
+            Err(e) => match metadata(path) {
                 Ok(meta) => Finfo {
                     path: path.to_path_buf(),
                     source: sc.source,
@@ -57,7 +57,6 @@ impl Finfo {
         match lsc {
             LogSource::Wtmp => ContentFormat::Binary,
             LogSource::Auth | LogSource::Sys => ContentFormat::PlainText,
-            LogSource::Container => ContentFormat::Unknown,
         }
     }
 

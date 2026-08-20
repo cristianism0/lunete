@@ -15,7 +15,7 @@ fn main() {
 
     let scope = JournalScope::User;
     let mode = TableMode::Summary {
-        columns: [0, 1, 2, 8, 15].to_vec(),
+        columns: (1..9).collect(),
     };
 
     let vec_entry = run_all(pf, scope.clone());
@@ -24,9 +24,8 @@ fn main() {
         let records = vec![
             RecordType::Sys(entry),
             RecordType::Auth(entry),
-            RecordType::Wtmp(entry),
-            RecordType::Journal(entry, scope.clone()),
-            RecordType::Container(entry),
+            //RecordType::Wtmp(entry),
+            //RecordType::Journal(entry, &scope),
         ];
 
         let tables = render_all_tables(records, &mode);

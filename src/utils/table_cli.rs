@@ -1,6 +1,4 @@
-use crate::models::{
-    AuthRecord, ContainerRecord, FromLogEntry, JournalRecord, LogEntry, SysRecord, WtmpRecord,
-};
+use crate::models::{AuthRecord, FromLogEntry, JournalRecord, LogEntry, SysRecord, WtmpRecord};
 use crate::models::{JournalScope, RecordType, TableMode};
 use tabled::{
     Table, Tabled,
@@ -113,7 +111,6 @@ pub fn render_all_tables(records: Vec<RecordType<'_>>, mode: &TableMode) -> Vec<
             RecordType::Journal(entries, scope) => {
                 build_journal_table::<JournalRecord>(entries, &scope, &mode)
             }
-            RecordType::Container(entries) => build_table::<ContainerRecord>(entries, &mode),
         };
 
         if let Some(table) = table_opt {

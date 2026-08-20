@@ -10,7 +10,7 @@ impl JournalParser for JournalLog {
     fn parser(&self, journal: &mut Journal) -> Result<Vec<LogEntry>, JournalError> {
         journal.seek_tail().map_err(|e| JournalError::IoError(e))?;
         journal
-            .previous_skip(2) // for now
+            .previous_skip(50) // for now
             .map_err(|e| JournalError::IoError(e))?;
 
         let mut entries = Vec::new();
