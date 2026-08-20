@@ -31,6 +31,13 @@ pub fn parser_selector(file_info: Finfo) -> Result<Vec<LogEntry>, ParseError> {
     }
 }
 
+pub fn journal_parsed(journal_scope: JournalScope) -> Result<Vec<LogEntry>, JournalError> {
+    let j = journal::JournalLog;
+    let mut jc = j.connect(journal_scope).unwrap();
+    let jentry = j.parser(&mut jc).unwrap();
+    Ok(jentry)
+}
+
 pub trait LogParser {
     fn parser(&self, path: &Path) -> Result<Vec<LogEntry>, ParseError>;
 
@@ -61,5 +68,5 @@ pub trait JournalParser {
         opts.open()
             .map_err(|e| JournalError::Unavailable(e.to_string()))
     }
-    fn parse(&self, journal: &mut Journal) -> Result<Vec<LogEntry>, JournalError>;
+    fn parser(&self, journal: &mut Journal) -> Result<Vec<LogEntry>, JournalError>;
 }

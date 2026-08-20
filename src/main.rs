@@ -2,8 +2,9 @@ pub mod models;
 pub mod parsers;
 pub mod utils;
 
-use crate::utils::extract::build_table;
-use crate::{models::*, parsers::selector::parser_selector};
+use crate::models::*;
+use crate::utils::runner::run_all;
+use crate::utils::table_cli::render_all_tables;
 
 fn main() {
     let mut pf = vec![];
@@ -12,24 +13,25 @@ fn main() {
         pf.push(info);
     }
 
-    let mut entries = vec![];
-    for info in pf {
-        match parser_selector(info) {
-            Ok(mut e) => entries.append(&mut e),
-            Err(e) => eprintln!("error: {:#?}", e),
-        }
-    }
-    let t = vec![
-        build_table::<SysRecord>(&entries),
-        build_table::<AuthRecord>(&entries),
-        build_table::<WtmpRecord>(&entries),
-        build_table::<JournalRecord>(&entries),
-        build_table::<ContainerRecord>(&entries),
-    ];
+    let scope = JournalScope::User;
+    let mode = TableMode::Summary {
+        columns: [0, 1, 2, 8, 15].to_vec(),
+    };
 
-    for d in t {
-        if let Some(_table) = d {
-            //println!("{table}");
+    let vec_entry = run_all(pf, scope.clone());
+
+    for entry in &vec_entry {
+        let records = vec![
+            RecordType::Sys(entry),
+            RecordType::Auth(entry),
+            RecordType::Wtmp(entry),
+            RecordType::Journal(entry, scope.clone()),
+            RecordType::Container(entry),
+        ];
+
+        let tables = render_all_tables(records, &mode);
+        for table in tables {
+            println!("{table}");
         }
     }
 }

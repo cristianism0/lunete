@@ -11,10 +11,25 @@ pub enum LogSource {
     Container,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum JournalScope {
     System,
     User,
+}
+
+pub enum TableMode {
+    Standard,
+    Compact { max_col_width: usize },
+    KeyValue,
+    Summary { columns: Vec<usize> },
+}
+
+pub enum RecordType<'a> {
+    Sys(&'a [LogEntry]),
+    Auth(&'a [LogEntry]),
+    Wtmp(&'a [LogEntry]),
+    Journal(&'a [LogEntry], JournalScope),
+    Container(&'a [LogEntry]),
 }
 
 // ---------- Paths ----------
@@ -137,7 +152,63 @@ pub struct WtmpRecord {
 
 #[derive(Debug, Tabled)]
 pub struct JournalRecord {
-    pub raw: String,
+    pub message: String,
+    #[tabled(display("display_opt"))]
+    pub priority: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub code_file: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub code_func: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub code_line: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub syslog_facility: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub syslog_identifier: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub tid: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _audit_loginuid: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _audit_session: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _boot_id: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _gid: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _hostname: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _machine_id: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _pid: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _runtime_scope: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _selinux_context: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _source_monotonic_timestamp: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _source_boottime_timestamp: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _source_realtime_timestamp: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _systemd_cgroup: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _systemd_owner_uid: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _systemd_slice: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _systemd_unit: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _systemd_user_slice: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _transport: Option<String>,
+    #[tabled(display("display_opt"))]
+    pub _uid: Option<String>,
+}
+
+fn display_opt(opt: &Option<String>) -> String {
+    opt.as_deref().unwrap_or("-").to_string()
 }
 
 #[derive(Debug, Tabled)]
