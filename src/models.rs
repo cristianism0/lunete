@@ -39,25 +39,27 @@ pub struct SourceCandidate {
 
 pub const SOURCES: &[SourceCandidate] = &[
     SourceCandidate {
-        source: LogSource::Auth,
-        path: "/var/log/secure",
-    },
-    SourceCandidate {
         source: LogSource::Wtmp,
         path: "/var/log/wtmp",
     },
+    // legacy - fallback for journald and openrc
+    // rhel
     SourceCandidate {
-        source: LogSource::Sys,
-        path: "/var/log/syslog",
+        source: LogSource::Auth,
+        path: "/var/log/secure",
     },
     SourceCandidate {
         source: LogSource::Sys,
         path: "/var/log/messages",
     },
-    // legacy - fallback for journald
+    //debian
     SourceCandidate {
         source: LogSource::Auth,
         path: "/var/log/auth.log",
+    },
+    SourceCandidate {
+        source: LogSource::Sys,
+        path: "/var/log/syslog",
     },
 ];
 // ---------- File Variants ----------
@@ -108,7 +110,7 @@ pub enum PathStatus {
 
 #[derive(Debug)]
 pub enum ParseError {
-    IoError(Error),
+    IoError(String),
     MalformedLine(String),
     UnexpectedFormat(String),
 }

@@ -8,8 +8,15 @@ pub struct WtmpLog;
 impl LogParser for WtmpLog {
     fn parser(&self, path: &Path) -> Result<Vec<LogEntry>, ParseError> {
         let mut cursor: u64 = 0;
-        let mut f = File::open(path).map_err(ParseError::IoError)?;
-        let meta = f.metadata().map_err(ParseError::IoError)?;
+        let mut f = File::open(path).map_err(|e| {
+            ParseError::IoError(format!("Cannot open file at {:#?} due to: {e}", path))
+        })?;
+        let meta = f.metadata().map_err(|e| {
+            ParseError::IoError(format!(
+                "Cannot traverse path: {:#?}. Due to error {e}.",
+                path
+            ))
+        })?;
         let file_len = meta.len();
 
         if file_len < cursor {
@@ -20,9 +27,11 @@ impl LogParser for WtmpLog {
 
         if file_len > cursor {
             f.seek(SeekFrom::Start(cursor))
-                .map_err(ParseError::IoError)?;
+                .map_err(|e| ParseError::IoError(format!("Journal seek error {e}")))?;
             let mut buf = vec![0u8; (file_len - cursor) as usize];
-            f.read_exact(&mut buf).map_err(ParseError::IoError)?;
+            f.read_exact(&mut buf).map_err(|e| {
+                ParseError::IoError(format!("Cannot read journald due to error: {e}"))
+            })?;
 
             for r in buf.chunks_exact(384) {
                 entries.push(LogEntry::Wtmp(parse_record(r)));

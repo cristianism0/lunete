@@ -43,7 +43,10 @@ pub trait LogParser {
                 "Path doesn't exists or was moved: {:#?}",
                 path
             ))),
-            Err(e) => Err(ParseError::IoError(e)),
+            Err(e) => Err(ParseError::IoError(format!(
+                "Cannot open path {:#?} due to error: {e}",
+                path
+            ))),
         }
     }
 }
