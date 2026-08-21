@@ -14,9 +14,7 @@ pub struct AuthLog;
 
 impl LogParser for AuthLog {
     fn parser(&self, path: &Path) -> Result<Vec<LogEntry>, ParseError> {
-        let sec_pattern = Regex::new(
-            r"^(?:<(?P<pri>[0-9]+)>)?(?P<month>[A-Za-z]{3})\s+(?P<day>[0-9]{1,2})\s+(?P<time>[0-9]{2}:[0-9]{2}:[0-9]{2})\s+(?P<host>\S+)\s+(?P<process>[^:]+):\s*(?P<caller>[^:]+\([^)]+\)|[^:]+):\s*(?P<msg>.*)$"
-            ).unwrap();
+        let sec_pattern = Regex::new(r"^(?:<(?P<pri>\d+)>)?(?P<timestamp>(?P<month>[A-Za-z]{3})\s+(?P<day>\d{1,2})\s+(?P<time>\d{2}:\d{2}:\d{2}))\s+(?P<host>\S+)\s+(?P<process>[^\[:]+)(?:\[(?P<pid>\d+)\])?:\s*(?:(?P<caller>[^:]+):\s*)?(?P<msg>.*)$").unwrap();
 
         let f = File::open(path).map_err(|e| {
             ParseError::IoError(format!("Cannot open file at {:#?} due to: {e}", path))
@@ -25,7 +23,7 @@ impl LogParser for AuthLog {
         let mut bufr = BufReader::new(f);
         let mut bufl = String::new();
 
-        let mut entries = Vec::new();
+        let mut entries: Vec<LogEntry> = Vec::new();
         while bufr.read_line(&mut bufl).map_err(|e| {
             ParseError::MalformedLine(format!(
                 "Error ocurred during file reading at {:#?}: {e}",
@@ -39,10 +37,7 @@ impl LogParser for AuthLog {
             ));
             bufl.clear();
         }
-
-        Err(ParseError::MalformedLine(
-            "Auth::parser not yet implemented".into(),
-        ))
+        Ok(entries)
     }
 }
 

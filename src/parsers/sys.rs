@@ -1,14 +1,53 @@
-use crate::models::{LogEntry, ParseError};
+use crate::models::{LogEntry, ParseError, SysRecord};
 use crate::parsers::selector::LogParser;
+
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+use std::path::Path;
+
 use regex::Regex;
 pub struct SysLog;
 
 impl LogParser for SysLog {
-    fn parser(&self, _path: &std::path::Path) -> Result<Vec<LogEntry>, ParseError> {
-        let _sys_pattern = Regex::new(r"^(?:<(?P<pri>[0-9]+)>)?(?P<month>[A-Za-z]{3})\s+(?P<day>[0-9]{1,2})\s+(?P<time>[0-9]{2}:[0-9]{2}:[0-9]{2})\s+(?P<host>\S+)\s+(?P<process>[^:]+):\s*(?P<msg>.*)$").unwrap();
+    fn parser(&self, path: &Path) -> Result<Vec<LogEntry>, ParseError> {
+        let sec_pattern = Regex::new(r"^(?:<(?P<pri>\d+)>)?(?P<timestamp>(?P<month>[A-Za-z]{3})\s+(?P<day>\d{1,2})\s+(?P<time>\d{2}:\d{2}:\d{2}))\s+(?P<host>\S+)\s+(?P<process>[^\[:]+)(?:\[(?P<pid>\d+)\])?:\s*(?:(?P<caller>[^:]+):\s*)?(?P<msg>.*)$").unwrap();
 
-        Err(ParseError::MalformedLine(
-            "SysLog::parser not yet implemented".into(),
-        ))
+        let f = File::open(path).map_err(|e| {
+            ParseError::IoError(format!("Cannot open file at {:#?} due to: {e}", path))
+        })?;
+
+        let mut bufr = BufReader::new(f);
+        let mut bufl = String::new();
+
+        let mut entries: Vec<LogEntry> = Vec::new();
+        while bufr.read_line(&mut bufl).map_err(|e| {
+            ParseError::MalformedLine(format!(
+                "Error ocurred during file reading at {:#?}: {e}",
+                path
+            ))
+        })? > 0
+        {
+            let trimmed_bufl = bufl.trim_end();
+            entries.push(LogEntry::Sys(parse_re(&sec_pattern, trimmed_bufl).unwrap()));
+            bufl.clear();
+        }
+        Ok(entries)
     }
+}
+
+fn parse_re(pattern: &Regex, raw: &str) -> Option<SysRecord> {
+    let cap = pattern.captures(raw)?;
+
+    Some(SysRecord {
+        priority: cap.name("pri").map(|m| m.as_str().to_string()),
+        timestamp: format!(
+            "{} {} {}",
+            cap.name("month")?.as_str(),
+            cap.name("day")?.as_str(),
+            cap.name("time")?.as_str()
+        ),
+        host: cap.name("host")?.as_str().to_string(),
+        process: cap.name("process")?.as_str().to_string(),
+        message: cap.name("msg")?.as_str().to_string(),
+    })
 }

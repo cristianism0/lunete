@@ -34,7 +34,7 @@ fn main() {
     for entry in &vec_entry {
         let records = vec![
             RecordType::Sys(entry),
-            RecordType::Auth(entry),
+            //RecordType::Auth(entry),
             //RecordType::Wtmp(entry),
             //RecordType::Journal(entry, &scope),
         ];
