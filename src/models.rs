@@ -3,6 +3,8 @@ use std::path::PathBuf;
 
 use tabled::Tabled;
 
+use std::collections::HashMap;
+
 #[derive(Debug, Clone, Copy)]
 pub enum LogSource {
     Auth,
@@ -16,11 +18,23 @@ pub enum JournalScope {
     User,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TableKey {
+    Sys,
+    Auth,
+    Wtmp,
+    Journal,
+}
+
 pub enum TableMode {
     Standard,
-    Compact { max_col_width: usize },
+    Compact {
+        max_col_width: usize,
+    },
+    Summary {
+        columns: HashMap<TableKey, Vec<String>>,
+    },
     KeyValue,
-    Summary { columns: Vec<usize> },
 }
 
 pub enum RecordType<'a> {
