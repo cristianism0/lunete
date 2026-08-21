@@ -157,6 +157,8 @@ pub struct AuthRecord {
     pub timestamp: String,
     pub host: String,
     pub process: String,
+    #[tabled(display("display_opt"))]
+    pub caller: Option<String>,
     pub message: String,
 }
 

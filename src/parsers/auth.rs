@@ -1,21 +1,65 @@
-use crate::models::{LogEntry, ParseError};
+use crate::models::{AuthRecord, LogEntry, ParseError};
 use crate::parsers::selector::LogParser;
 use regex::Regex;
+use std::io::{BufRead, BufReader};
+use std::{fs::File, path::Path};
 
 pub struct AuthLog;
 
 // Structure for Auth and Sys follow RFC 3164:
 // PRI HEADER MSG
 // but, for a better readability most linus system ommit the priority
-// if you have priority available
+// if you have priority available (after change the rsyslog.conf) the regex will capture and
+// display.
 
 impl LogParser for AuthLog {
-    fn parser(&self, _path: &std::path::Path) -> Result<Vec<LogEntry>, ParseError> {
-        let _pattern = "<191>TIMESTAMP HOSTNAME/IP";
-        //Aug 20 19:14:57 hostname systemd[1]: Starting user@0.service - User Manager for UID 0...
+    fn parser(&self, path: &Path) -> Result<Vec<LogEntry>, ParseError> {
+        let sec_pattern = Regex::new(
+            r"^(?:<(?P<pri>[0-9]+)>)?(?P<month>[A-Za-z]{3})\s+(?P<day>[0-9]{1,2})\s+(?P<time>[0-9]{2}:[0-9]{2}:[0-9]{2})\s+(?P<host>\S+)\s+(?P<process>[^:]+):\s*(?P<caller>[^:]+\([^)]+\)|[^:]+):\s*(?P<msg>.*)$"
+            ).unwrap();
+
+        let f = File::open(path).map_err(|e| {
+            ParseError::IoError(format!("Cannot open file at {:#?} due to: {e}", path))
+        })?;
+
+        let mut bufr = BufReader::new(f);
+        let mut bufl = String::new();
+
+        let mut entries = Vec::new();
+        while bufr.read_line(&mut bufl).map_err(|e| {
+            ParseError::MalformedLine(format!(
+                "Error ocurred during file reading at {:#?}: {e}",
+                path
+            ))
+        })? > 0
+        {
+            let trimmed_bufl = bufl.trim_end();
+            entries.push(LogEntry::Auth(
+                parse_re(&sec_pattern, trimmed_bufl).unwrap(),
+            ));
+            bufl.clear();
+        }
 
         Err(ParseError::MalformedLine(
             "Auth::parser not yet implemented".into(),
         ))
     }
+}
+
+fn parse_re(pattern: &Regex, raw: &str) -> Option<AuthRecord> {
+    let cap = pattern.captures(raw)?;
+
+    Some(AuthRecord {
+        priority: cap.name("pri").map(|m| m.as_str().to_string()),
+        timestamp: format!(
+            "{} {} {}",
+            cap.name("month")?.as_str(),
+            cap.name("day")?.as_str(),
+            cap.name("time")?.as_str()
+        ),
+        host: cap.name("host")?.as_str().to_string(),
+        process: cap.name("process")?.as_str().to_string(),
+        caller: cap.name("caller").map(|m| m.as_str().to_string()),
+        message: cap.name("msg")?.as_str().to_string(),
+    })
 }

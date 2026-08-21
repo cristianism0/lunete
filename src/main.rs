@@ -35,8 +35,8 @@ fn main() {
         let records = vec![
             RecordType::Sys(entry),
             RecordType::Auth(entry),
-            RecordType::Wtmp(entry),
-            RecordType::Journal(entry, &scope),
+            //RecordType::Wtmp(entry),
+            //RecordType::Journal(entry, &scope),
         ];
 
         let tables = render_all_tables(records, &mode);
