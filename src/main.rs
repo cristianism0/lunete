@@ -1,10 +1,11 @@
+pub mod display;
 pub mod models;
 pub mod parsers;
 pub mod utils;
 
+use crate::display::table_cli::render_all_tables;
 use crate::models::*;
 use crate::utils::runner::run_all;
-use crate::utils::table_cli::render_all_tables;
 
 fn main() {
     let mut pf = vec![];

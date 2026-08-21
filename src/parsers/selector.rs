@@ -9,7 +9,7 @@ use crate::parsers::*;
 pub fn parser_selector(file_info: Finfo) -> Result<Vec<LogEntry>, ParseError> {
     match file_info.source {
         LogSource::Sys => {
-            let p = syslog::SysLog;
+            let p = sys::SysLog;
             p.check_access(&file_info.path)?;
             p.parser(&file_info.path)
         }

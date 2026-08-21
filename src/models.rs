@@ -126,12 +126,24 @@ pub enum JournalError {
 // ---------- Records ----------
 #[derive(Debug, Tabled)]
 pub struct SysRecord {
-    pub raw: String,
+    //syslog or messages
+    #[tabled(display("display_opt"))]
+    pub priority: Option<String>, //filtered
+    pub timestamp: String,
+    pub host: String,
+    pub process: String,
+    pub message: String,
 }
 
 #[derive(Debug, Tabled)]
 pub struct AuthRecord {
-    pub raw: String,
+    //auth or secure
+    #[tabled(display("display_opt"))]
+    pub priority: Option<String>, //filtered
+    pub timestamp: String,
+    pub host: String,
+    pub process: String,
+    pub message: String,
 }
 
 #[derive(Debug, Tabled)]
