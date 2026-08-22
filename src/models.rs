@@ -1,10 +1,11 @@
+use clap::ValueEnum;
 use std::io::Error;
 use std::path::PathBuf;
 
+use std::collections::HashMap;
 use tabled::Tabled;
 
-use std::collections::HashMap;
-
+// -------- Misc ---------
 #[derive(Debug, Clone, Copy)]
 pub enum LogSource {
     Auth,
@@ -12,13 +13,13 @@ pub enum LogSource {
     Wtmp,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ValueEnum)]
 pub enum JournalScope {
     System,
     User,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ValueEnum)]
 pub enum TableKey {
     Sys,
     Auth,
@@ -241,17 +242,6 @@ pub enum LogEntry {
     Auth(#[tabled(inline)] AuthRecord),
     Wtmp(#[tabled(inline)] WtmpRecord),
     Journal(#[tabled(inline)] JournalRecord),
-}
-
-impl LogEntry {
-    pub fn label(&self) -> &'static str {
-        match self {
-            LogEntry::Sys(_) => "SYS",
-            LogEntry::Auth(_) => "AUTH",
-            LogEntry::Wtmp(_) => "WTMP",
-            LogEntry::Journal(_) => "JOURNAL",
-        }
-    }
 }
 
 pub trait FromLogEntry {

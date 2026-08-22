@@ -1,14 +1,22 @@
+pub mod cli;
 pub mod display;
 pub mod models;
 pub mod parsers;
 pub mod utils;
 
+use crate::cli::table_cli_args;
 use crate::display::table_cli::render_all_tables;
 use crate::models::*;
 use crate::utils::runner::run_all;
 use std::collections::HashMap;
 
 fn main() {
+    // CLI
+    let args = table_cli_args();
+    let tmode = args.table_mode();
+    let scope = args.get_scope();
+
+    //TODO: remove all this bullshit below and implement the CLI display using those var above.
     let mut pf = vec![];
     for c in SOURCES {
         let info = Finfo::gather_info(c);
@@ -31,9 +39,9 @@ fn main() {
 
     let vec_entry = run_all(pf, scope.clone());
 
-    for entry in &vec_entry {
+    for _entry in &vec_entry {
         let records = vec![
-            RecordType::Sys(entry),
+            //RecordType::Sys(entry),
             //RecordType::Auth(entry),
             //RecordType::Wtmp(entry),
             //RecordType::Journal(entry, &scope),
